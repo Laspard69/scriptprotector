@@ -19,12 +19,11 @@ export async function POST(req: Request) {
 
   const id = await sha512Hex(script);
 
-  // ✅ force key with pathname
-  const { url } = await put(`scripts/${id}.txt`, script, {
+  // 🔑 Force it to use a stable key
+  await put(`scripts/${id}.txt`, script, {
     access: "public",
     contentType: "text/plain; charset=utf-8",
-    // NEW: explicit pathname makes it stable
-    pathname: `scripts/${id}.txt`,
+    pathname: `scripts/${id}.txt`
   });
 
   const origin = new URL(req.url).origin;
