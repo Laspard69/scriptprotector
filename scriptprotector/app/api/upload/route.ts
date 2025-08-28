@@ -13,18 +13,20 @@ async function sha512Hex(input: string) {
 
 export async function POST(req: Request) {
   const { script } = (await req.json()) as { script?: string };
-  if (!script || typeof script !== "string") {
+  if (!script) {
     return NextResponse.json({ error: "No script" }, { status: 400 });
   }
 
   const id = await sha512Hex(script);
-  const key = `scripts/${id}.txt`;
-  await put(key, script, {
+
+  // ✅ force key with pathname
+  const { url } = await put(`scripts/${id}.txt`, script, {
     access: "public",
     contentType: "text/plain; charset=utf-8",
+    // NEW: explicit pathname makes it stable
+    pathname: `scripts/${id}.txt`,
   });
 
-  // Build origin dynamically from the incoming request (no env var needed)
-  const origin = new URL(req.url).origin; // -> https://scriptprotector.vercel.app
+  const origin = new URL(req.url).origin;
   return NextResponse.json({ id, url: `${origin}/raw/${id}` });
 }
